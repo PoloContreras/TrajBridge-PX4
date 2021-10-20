@@ -1,8 +1,9 @@
 #include <bridge_px4/MPC.h>
 
 //ifstream in("/home/max/Documents/codegen/drone/WPs_jump.csv");
+ifstream in("/home/max/Documents/codegen/drone/hover.csv");
 //ifstream in("/home/carl/Desktop/CPG/TrajBridge-PX4/WPs_jump.csv");
-ifstream in("/home/carl/Desktop/CPG/TrajBridge-PX4/hover.csv");
+//ifstream in("/home/carl/Desktop/CPG/TrajBridge-PX4/hover.csv");
 
 const string MPC::states[] = {
     "px","py","pz",

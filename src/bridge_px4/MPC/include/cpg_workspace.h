@@ -36,11 +36,11 @@ typedef struct {
 
 // Parameters accepted by OSQP
 extern csc OSQP_P;
-extern c_float OSQP_q[645];
+extern c_float OSQP_q[705];
 extern c_float OSQP_d;
 extern csc OSQP_A;
-extern c_float OSQP_l[677];
-extern c_float OSQP_u[677];
+extern c_float OSQP_l[795];
+extern c_float OSQP_u[795];
 
 // Struct containing parameters accepted by OSQP
 extern OSQP_Params_t OSQP_Params;

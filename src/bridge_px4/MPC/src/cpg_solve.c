@@ -74,11 +74,11 @@ OSQP_Params.P->x[i] += OSQP_P_map.x[j]*CPG_Params_Vec[OSQP_P_map.i[j]];
 }
 void canonicalize_OSQP_A(){
 // reset values to zero
-for(i=0; i<4283; i++){
+for(i=0; i<4521; i++){
 OSQP_Params.A->x[i] = 0;
 }
 // compute sparse matrix multiplication
-for(i=0; i<4283; i++){
+for(i=0; i<4521; i++){
 for(j=OSQP_A_map.p[i]; j<OSQP_A_map.p[i+1]; j++){
 OSQP_Params.A->x[i] += OSQP_A_map.x[j]*CPG_Params_Vec[OSQP_A_map.i[j]];
 }
@@ -98,11 +98,11 @@ OSQP_Params.l[i] += OSQP_l_map.x[j]*CPG_Params_Vec[OSQP_l_map.i[j]];
 }
 void canonicalize_OSQP_u(){
 // reset values to zero
-for(i=0; i<677; i++){
+for(i=0; i<795; i++){
 OSQP_Params.u[i] = 0;
 }
 // compute sparse matrix multiplication
-for(i=0; i<677; i++){
+for(i=0; i<795; i++){
 for(j=OSQP_u_map.p[i]; j<OSQP_u_map.p[i+1]; j++){
 OSQP_Params.u[i] += OSQP_u_map.x[j]*CPG_Params_Vec[OSQP_u_map.i[j]];
 }

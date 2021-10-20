@@ -48,12 +48,11 @@ protected:
 
 private:
   // Limit Check variables
-  float pxy_slim_;
-  float pz_slim_;
-  float v_slim_;
-  float q_slim_;
-  float ep_lim_;
-  float eq_lim_;
+  float x_box_lim_;
+  float y_box_lim_;
+  float z_box_lim_;
+  float mass_;
+  float setpoint_mode_;
   Matrix<float,10,1> del_slim;
   Matrix<float,7,1> err_lim;
 
@@ -72,8 +71,6 @@ private:
 
   vector<float> stats;    // [overall node time, spin time, read time, init time, ASA time, osqp time, publish time, number of iterations]
 
-  int setpoint_mode;
-
   float amp_x;
   float amp_y;
   float amp_z;
@@ -88,13 +85,13 @@ private:
   float off_z;
 
   float yaw_sp;
-  float mass;
   float F_max;
 
   // Counter and Time Variables
   double t_dt;
   int k_main;
   bool main_switch;
+  bool safety_switch;
 
   // Quad Setpoints
   geometry_msgs::Vector3Stamped force_sp_out;      // Setpoint Attitude (body rate, orientation, thrust) Out

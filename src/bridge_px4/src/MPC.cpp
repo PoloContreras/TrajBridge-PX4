@@ -1,6 +1,8 @@
 #include <bridge_px4/MPC.h>
 
-ifstream in("/home/max/Documents/codegen/drone/WPs_jump.csv");
+//ifstream in("/home/max/Documents/codegen/drone/WPs_jump.csv");
+//ifstream in("/home/carl/Desktop/CPG/TrajBridge-PX4/WPs_jump.csv");
+ifstream in("/home/carl/Desktop/CPG/TrajBridge-PX4/hover.csv");
 
 const string MPC::states[] = {
     "px","py","pz",
@@ -8,16 +10,14 @@ const string MPC::states[] = {
     "qw","qx","qy","qz"};
 
 MPC::MPC()
-:   pxy_slim_(1.0),pz_slim_(0.5),v_slim_(0.5),q_slim_(0.3),
-    ep_lim_(3.0),eq_lim_(0.6)
+:   x_box_lim_(3.0),y_box_lim_(1.75),z_box_lim_(1.0),
+    mass_(0.53),setpoint_mode_(1)
 {
-    ros::param::get("~pxy_slim", pxy_slim_);
-    ros::param::get("~pz_slim", pz_slim_);
-    ros::param::get("~v_slim", v_slim_);
-    ros::param::get("~q_slim", q_slim_);
-
-    ros::param::get("~ep_lim", ep_lim_);
-    ros::param::get("~eq_lim", eq_lim_);
+    ros::param::get("~x_box_lim", x_box_lim_);
+    ros::param::get("~y_box_lim", y_box_lim_);
+    ros::param::get("~z_box_lim", z_box_lim_);
+    ros::param::get("~mass", mass_);
+    ros::param::get("~setpoint_mode", setpoint_mode_);
 
     // ROS Initialization
     pose_curr_sub = nh.subscribe("mavros/local_position/pose",1,&MPC::pose_curr_cb,this);
@@ -27,10 +27,12 @@ MPC::MPC()
     stats_pub = nh.advertise<std_msgs::Float64MultiArray>("stats",1); 
 
     // Initialize Limits Vector
+    /*
     del_slim(0,0) = del_slim(1,0) = pxy_slim_;
     del_slim(2,0) = pz_slim_;
     del_slim(3,0) = del_slim(4,0) = del_slim(5,0) = v_slim_;
     del_slim(6,0) = del_slim(7,0) = del_slim(8,0) = del_slim(9,0) = q_slim_;
+    */
 
     /*
     cout << "pos_xy safety limit: " << pxy_slim_ << endl;
@@ -39,19 +41,20 @@ MPC::MPC()
     cout << "quat safety limit: " << q_slim_ << endl;
     */
 
+    /*
     err_lim(0,0) = err_lim(1,0) = err_lim(2,0) = ep_lim_;
     err_lim(3,0) = err_lim(4,0) = err_lim(5,0) = err_lim(6,0) = eq_lim_;
+    */
 
     k_main = 0;
     main_switch = false;
+    safety_switch = true;
 
-    mass = 1.5;
-    F_max = 1.5*mass*9.81;
-
-    update_fv_min(-0.5*mass*9.81);
-    update_fv_max(F_max*0.98481 - mass*9.81);
+    F_max = 1.5*mass_*9.81;
+    update_fv_min(-0.5*mass_*9.81);
+    update_fv_max(F_max*0.98481 - mass_*9.81);
     for (int i = 0; i < 10; i++) {
-        update_G(i, 0.12468*mass*9.81);
+        update_G(i, 0.12468*mass_*9.81);
     }
 
     set_OSQP_check_termination(5);
@@ -62,9 +65,7 @@ MPC::MPC()
     stats_out.layout.dim[0].stride = 1;
     stats_out.layout.dim[0].label = "stats";
 
-    setpoint_mode = 1; // 1: read from .csv, 2: circle, 3: lissajou
-
-    if (setpoint_mode == 2) {
+    if (setpoint_mode_ == 2) {
 
         amp_x = 1.0;
         amp_y = 1.0;
@@ -82,7 +83,7 @@ MPC::MPC()
         off_y = 0.0;
         off_z = 0.5;
 
-    } else if (setpoint_mode == 3) {
+    } else if (setpoint_mode_ == 3) {
 
         amp_x = 2.0;
         amp_y = 1.0;
@@ -132,7 +133,7 @@ void MPC::vel_curr_cb(const geometry_msgs::TwistStamped::ConstPtr& msg){
 bool MPC::setpoint_update()
 {
 
-    if (setpoint_mode == 1) {
+    if (setpoint_mode_ == 1) {
 
         if (in) {
 
@@ -191,12 +192,23 @@ bool MPC::setpoint_update()
 
 bool MPC::limit_check()
 {
-    for (int i = 0; i < 10; i++) {
-        if (abs(del_x(i,0)) > del_slim(i,0)) {
-            cout << "Limit Triggered by State: " << states[i] << " at " << k_main*t_dt << "s." << endl;
-            cout << "Limit was: " << del_slim(i,0) << ", but I had: " << del_x(i,0) << endl;
-            return false;
-        }
+
+    if (abs(x_curr(0,0)) > x_box_lim_) {
+        cout << "Limit Triggered by x position at " << k_main/30 << "s." << endl;
+        cout << "Limit was: " << x_box_lim_ << ", but I had: " << x_curr(0,0) << endl;
+        return false;
+    }
+
+    if (abs(x_curr(1,0)) > y_box_lim_) {
+        cout << "Limit Triggered by y position at " << k_main/30 << "s." << endl;
+        cout << "Limit was: " << y_box_lim_ << ", but I had: " << x_curr(1,0) << endl;
+        return false;
+    }
+
+    if (abs(x_curr(2,0)-1.0) > z_box_lim_) {
+        cout << "Limit Triggered by z position at " << k_main/30 << "s." << endl;
+        cout << "Limit was: " << z_box_lim_ << ", but I had: " << x_curr(2,0)-1.0 << endl;
+        return false;
     }
 
     return true;
@@ -204,7 +216,8 @@ bool MPC::limit_check()
 
 void MPC::controller(ros::Time t_start)
 {
-    if (main_switch == true) {
+
+    if ((main_switch == true) && (safety_switch == true)) {
 
         ros::Time t_end_spin = ros::Time::now();
 
@@ -228,12 +241,12 @@ void MPC::controller(ros::Time t_start)
                 update_u_prev(i, CPG_Result.U[3+i]);
             }
             
-            if (/*limit_check() ==*/ true) {
+            if (limit_check() == true) {
 
                 // Publish force setpoint
                 force_sp_out.vector.x = CPG_Result.U[3];
                 force_sp_out.vector.y = CPG_Result.U[4];
-                force_sp_out.vector.z = CPG_Result.U[5] + mass*9.81;
+                force_sp_out.vector.z = CPG_Result.U[5] + mass_*9.81;
 
                 force_sp_out.header.stamp = ros::Time::now();
                 force_sp_out.header.seq = k_main;
@@ -259,6 +272,10 @@ void MPC::controller(ros::Time t_start)
                 stats_out.data.insert(stats_out.data.end(), stats.begin(), stats.end());
 
                 stats_pub.publish(stats_out);
+
+            } else {
+
+                safety_switch = false;
 
             }
         }

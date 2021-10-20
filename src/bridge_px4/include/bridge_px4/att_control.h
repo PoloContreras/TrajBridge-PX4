@@ -37,16 +37,7 @@ protected:
 
 private:
   // Limit Check variables
-  float pxy_slim_;
-  float pz_slim_;
-  float v_slim_;
-  float q_slim_;
-  float ep_lim_;
-  float eq_lim_;
-  Matrix<float,10,1> del_slim;
-  Matrix<float,7,1> err_lim;
-
-  static const string states[];
+  float max_thrust_;
 
   // ROS variables
   ros::Subscriber    pose_curr_sub;

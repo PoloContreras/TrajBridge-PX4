@@ -29,10 +29,16 @@
 
    <!-- Initialize MPC -->
    <node pkg="bridge_px4" type="MPC" name ="MPC" output="screen">
+      <param name="x_box_lim" value="3.0"/>
+      <param name="y_box_lim" value="1.75"/>
+      <param name="z_box_lim" value="1.0"/>
+      <param name="mass" value="1.5"/>
+      <param name="setpoint_mode" value="1"/> <!-- 1: read from .csv, 2: circle, 3: lissajou -->
    </node>
 
    <!-- Initialize the Attitude Controller -->
    <node pkg="bridge_px4" type="att_control" name ="att_control" output="screen">
+      <param name="max_thrust" value="21.1546"/>
    </node>
 
    <!-- Initialize the mavros bridge over serial -->

@@ -1,21 +1,9 @@
 #include <bridge_px4/att_control.h>
 
-const string Att_Control::states[] = {
-    "px","py","pz",
-    "vx","vy","vz",
-    "qw","qx","qy","qz"};
-
 Att_Control::Att_Control()
-:   pxy_slim_(1.0),pz_slim_(0.5),v_slim_(0.5),q_slim_(0.3),
-    ep_lim_(3.0),eq_lim_(0.6)
+:   max_thrust_(21.1546)
 {
-    ros::param::get("~pxy_slim", pxy_slim_);
-    ros::param::get("~pz_slim", pz_slim_);
-    ros::param::get("~v_slim", v_slim_);
-    ros::param::get("~q_slim", q_slim_);
-
-    ros::param::get("~ep_lim", ep_lim_);
-    ros::param::get("~eq_lim", eq_lim_);
+    ros::param::get("~max_thrust", max_thrust_);
 
     // ROS Initialization
     pose_curr_sub = nh.subscribe("mavros/local_position/pose",1,&Att_Control::pose_curr_cb,this);
@@ -28,11 +16,13 @@ Att_Control::Att_Control()
     att_sp_out.header.frame_id = "map";
     att_sp_out.type_mask = att_sp_out.IGNORE_ATTITUDE;
 
+    /*
     // Initialize Limits Vector
     del_slim(0,0) = del_slim(1,0) = pxy_slim_;
     del_slim(2,0) = pz_slim_;
     del_slim(3,0) = del_slim(4,0) = del_slim(5,0) = v_slim_;
     del_slim(6,0) = del_slim(7,0) = del_slim(8,0) = del_slim(9,0) = q_slim_;
+    */
 
     /*
     cout << "pos_xy safety limit: " << pxy_slim_ << endl;
@@ -41,8 +31,10 @@ Att_Control::Att_Control()
     cout << "quat safety limit: " << q_slim_ << endl;
     */
 
+    /*
     err_lim(0,0) = err_lim(1,0) = err_lim(2,0) = ep_lim_;
     err_lim(3,0) = err_lim(4,0) = err_lim(5,0) = err_lim(6,0) = eq_lim_;
+    */
 
     /*
     cout << "pos integral limit: " << ep_lim_ << endl;
@@ -130,7 +122,7 @@ void Att_Control::controller()
         }
 
         // compute setpoints
-        att_sp_out.thrust = sqrt(force_sp(0,0)*force_sp(0,0) + force_sp(1,0)*force_sp(1,0) + force_sp(2,0)*force_sp(2,0)) / 21.1546;
+        att_sp_out.thrust = sqrt(force_sp(0,0)*force_sp(0,0) + force_sp(1,0)*force_sp(1,0) + force_sp(2,0)*force_sp(2,0)) / max_thrust_;
         att_sp_out.body_rate.x = sign*(2/tau)*q_err(1,0);
         att_sp_out.body_rate.y = sign*(2/tau)*q_err(2,0);
         att_sp_out.body_rate.z = sign*(2/tau)*q_err(3,0);

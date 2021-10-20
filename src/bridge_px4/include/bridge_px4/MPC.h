@@ -69,7 +69,7 @@ private:
   Matrix<float,17,1> x_curr;  // Current State
   Matrix<float,17,1> del_x;   // Current State Error Relative to Nominal
 
-  vector<float> stats;    // [overall node time, spin time, read time, init time, ASA time, osqp time, publish time, number of iterations]
+  vector<double> stats;    // [overall node time, spin time, read time, init time, ASA time, osqp time, publish time, number of iterations]
 
   float amp_x;
   float amp_y;

@@ -1,7 +1,7 @@
 #include <bridge_px4/MPC.h>
 
-//ifstream in("/home/max/Documents/codegen/drone/WPs_jump.csv");
-ifstream in("/home/max/Documents/codegen/drone/hover.csv");
+ifstream in("/home/max/Documents/codegen/drone/WPs_jump.csv");
+//ifstream in("/home/max/Documents/codegen/drone/hover.csv");
 //ifstream in("/home/carl/Desktop/CPG/TrajBridge-PX4/WPs_jump.csv");
 //ifstream in("/home/carl/Desktop/CPG/TrajBridge-PX4/hover.csv");
 
@@ -12,13 +12,19 @@ const string MPC::states[] = {
 
 MPC::MPC()
 :   x_box_lim_(3.0),y_box_lim_(1.75),z_box_lim_(1.0),
-    mass_(0.53),setpoint_mode_(1)
+    mass_(0.53),setpoint_mode_(1),
+    s_sqrt_h_(0.1),s_sqrt_v_(0.1),
+    r_sqrt_h_(0.5),r_sqrt_v_(0.5)
 {
     ros::param::get("~x_box_lim", x_box_lim_);
     ros::param::get("~y_box_lim", y_box_lim_);
     ros::param::get("~z_box_lim", z_box_lim_);
     ros::param::get("~mass", mass_);
     ros::param::get("~setpoint_mode", setpoint_mode_);
+    ros::param::get("~s_sqrt_h", s_sqrt_h_);
+    ros::param::get("~s_sqrt_v", s_sqrt_v_);
+    ros::param::get("~r_sqrt_h", r_sqrt_h_);
+    ros::param::get("~r_sqrt_v", r_sqrt_v_);
 
     // ROS Initialization
     pose_curr_sub = nh.subscribe("mavros/local_position/pose",1,&MPC::pose_curr_cb,this);
@@ -58,8 +64,16 @@ MPC::MPC()
         update_G(i, 0.12468*mass_*9.81);
     }
 
-    set_OSQP_check_termination(5);
-    set_OSQP_max_iter(15);
+    update_S_sqrt(0, s_sqrt_h_);
+    update_S_sqrt(4, s_sqrt_h_);
+    update_S_sqrt(8, s_sqrt_v_);
+
+    update_R_sqrt(0, r_sqrt_h_);
+    update_R_sqrt(4, r_sqrt_h_);
+    update_R_sqrt(8, r_sqrt_v_);
+
+    set_solver_check_termination(5);
+    set_solver_max_iter(15);
 
     stats_out.layout.dim.push_back(std_msgs::MultiArrayDimension());
     stats_out.layout.dim[0].size = 8;

@@ -53,6 +53,10 @@ private:
   float z_box_lim_;
   float mass_;
   float setpoint_mode_;
+  float s_sqrt_h_;
+  float s_sqrt_v_;
+  float r_sqrt_h_;
+  float r_sqrt_v_;
   Matrix<float,10,1> del_slim;
   Matrix<float,7,1> err_lim;
 

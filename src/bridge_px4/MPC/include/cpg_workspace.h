@@ -5,25 +5,22 @@
 # define CPG_TYPES_H
 
 typedef struct {
-    int         P;              ///< bool, if OSQP parameter P outdated
-    int         q;              ///< bool, if OSQP parameter q outdated
-    int         d;              ///< bool, if OSQP parameter d outdated
-    int         A;              ///< bool, if OSQP parameter A outdated
-    int         l;              ///< bool, if OSQP parameter l outdated
-    int         u;              ///< bool, if OSQP parameter u outdated
-} OSQP_Outdated_t;
-
-// Struct containing flags for outdated OSQP parameters
-extern OSQP_Outdated_t OSQP_Outdated;
+    int         P;       ///< bool, if canonical parameter P outdated
+    int         q;       ///< bool, if canonical parameter q outdated
+    int         d;       ///< bool, if canonical parameter d outdated
+    int         A;       ///< bool, if canonical parameter A outdated
+    int         l;       ///< bool, if canonical parameter l outdated
+    int         u;       ///< bool, if canonical parameter u outdated
+} Canon_Outdated_t;
 
 typedef struct {
-    csc         *P;              ///< OSQP parameter P
-    c_float     *q;              ///< OSQP parameter q
-    c_float     *d;              ///< OSQP parameter d
-    csc         *A;              ///< OSQP parameter A
-    c_float     *l;              ///< OSQP parameter l
-    c_float     *u;              ///< OSQP parameter u
-} OSQP_Params_t;
+    csc         *P;      ///< bool, if canonical parameter P outdated
+    c_float     *q;      ///< bool, if canonical parameter q outdated
+    c_float     *d;      ///< bool, if canonical parameter d outdated
+    csc         *A;      ///< bool, if canonical parameter A outdated
+    c_float     *l;      ///< bool, if canonical parameter l outdated
+    c_float     *u;      ///< bool, if canonical parameter u outdated
+} Canon_Params_t;
 
 typedef struct {
     c_float     *objective_value;     ///< Objective function value
@@ -34,30 +31,38 @@ typedef struct {
 
 #endif // ifndef CPG_TYPES_H
 
-// Parameters accepted by OSQP
-extern csc OSQP_P;
-extern c_float OSQP_q[705];
-extern c_float OSQP_d;
-extern csc OSQP_A;
-extern c_float OSQP_l[795];
-extern c_float OSQP_u[795];
+// Struct containing flags for outdated canonical parameters
+extern Canon_Outdated_t Canon_Outdated;
 
-// Struct containing parameters accepted by OSQP
-extern OSQP_Params_t OSQP_Params;
+// Canonical parameters
+extern csc Canon_P;
+extern csc Canon_P_ECOS;
+extern c_float Canon_q[705];
+extern c_float Canon_q_ECOS[705];
+extern c_float Canon_d;
+extern c_float Canon_d_ECOS;
+extern csc Canon_A;
+extern csc Canon_A_ECOS;
+extern c_float Canon_l[795];
+extern c_float Canon_l_ECOS[795];
+extern c_float Canon_u[795];
+extern c_float Canon_u_ECOS[795];
 
-// Sparse mappings from user-defined to OSQP-accepted parameters
-extern csc OSQP_P_map;
-extern csc OSQP_A_map;
-extern csc OSQP_l_map;
-extern csc OSQP_u_map;
+// Struct containing canonical parameters
+extern Canon_Params_t Canon_Params;
+extern Canon_Params_t Canon_Params_ECOS;
+
+// Sparse mappings from user-defined to canonical parameters
+extern csc Canon_P_map;
+extern csc Canon_A_map;
+extern csc Canon_l_map;
+extern csc Canon_u_map;
 
 // Vector containing flattened user-defined parameters
 extern c_float CPG_Params_Vec[187];
 
 // Value of the objective function
 extern c_float objective_value;
-
-// User-defined variables
 
 // Struct containing CPG objective value and solution
 extern CPG_Result_t CPG_Result;

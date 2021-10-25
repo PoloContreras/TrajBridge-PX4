@@ -119,14 +119,16 @@ catkin_package(
 ## Build ##
 ###########
 
+# Add MPC subdirectory
+add_subdirectory(MPC)
+
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
-  MPC/include
-  MPC/OSQP_code/include
+  ${cpg_include}
 )
 
 ## Declare a C++ library
@@ -137,9 +139,6 @@ include_directories(
 add_library(libpid
   src/pid.cpp
 )
-
-# Add MPC subdirectory
-add_subdirectory(MPC)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -184,7 +183,7 @@ add_executable(att_control src/att_control.cpp)
 target_link_libraries(att_control ${catkin_LIBRARIES})
 add_dependencies(att_control ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-add_executable(MPC src/MPC.cpp ${cpg_src})
+add_executable(MPC src/MPC.cpp ${cpg_head} ${cpg_src})
 target_link_libraries(MPC ${catkin_LIBRARIES})
 add_dependencies(MPC ${${PROJECT_NAME}_EXPORTED_TARGETS})
 

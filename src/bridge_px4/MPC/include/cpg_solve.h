@@ -1,13 +1,13 @@
 
 #include "types.h"
 
-// map user-defined to OSQP-accepted parameters
-extern void canonicalize_OSQP_P();
-extern void canonicalize_OSQP_q();
-extern void canonicalize_OSQP_d();
-extern void canonicalize_OSQP_A();
-extern void canonicalize_OSQP_l();
-extern void canonicalize_OSQP_u();
+// map user-defined to canonical parameters
+extern void canonicalize_Canon_P();
+extern void canonicalize_Canon_q();
+extern void canonicalize_Canon_d();
+extern void canonicalize_Canon_A();
+extern void canonicalize_Canon_l();
+extern void canonicalize_Canon_u();
 
 // retrieve user-defined objective function value
 extern void retrieve_value();
@@ -32,15 +32,15 @@ extern void update_fv_max(c_float val);
 extern void update_gamma(c_float val);
 extern void update_G(c_int idx, c_float val);
 
-// update OSQP settings
-extern void set_OSQP_default_settings();
-extern void set_OSQP_rho(c_float rho_new);
-extern void set_OSQP_max_iter(c_int max_iter_new);
-extern void set_OSQP_eps_abs(c_float eps_abs_new);
-extern void set_OSQP_eps_rel(c_float eps_rel_new);
-extern void set_OSQP_eps_prim_inf(c_float eps_prim_inf_new);
-extern void set_OSQP_eps_dual_inf(c_float eps_dual_inf_new);
-extern void set_OSQP_alpha(c_float alpha_new);
-extern void set_OSQP_scaled_termination(c_int scaled_termination_new);
-extern void set_OSQP_check_termination(c_int check_termination_new);
-extern void set_OSQP_warm_start(c_int warm_start_new);
+// update solver settings
+extern void set_solver_default_settings();
+extern void set_solver_rho(c_float rho_new);
+extern void set_solver_max_iter(c_int max_iter_new);
+extern void set_solver_eps_abs(c_float eps_abs_new);
+extern void set_solver_eps_rel(c_float eps_rel_new);
+extern void set_solver_eps_prim_inf(c_float eps_prim_inf_new);
+extern void set_solver_eps_dual_inf(c_float eps_dual_inf_new);
+extern void set_solver_alpha(c_float alpha_new);
+extern void set_solver_scaled_termination(c_int scaled_termination_new);
+extern void set_solver_check_termination(c_int check_termination_new);
+extern void set_solver_warm_start(c_int warm_start_new);

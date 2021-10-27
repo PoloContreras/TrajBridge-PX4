@@ -76,7 +76,7 @@ MPC::MPC()
     set_solver_max_iter(15);
 
     stats_out.layout.dim.push_back(std_msgs::MultiArrayDimension());
-    stats_out.layout.dim[0].size = 8;
+    stats_out.layout.dim[0].size = 9;
     stats_out.layout.dim[0].stride = 1;
     stats_out.layout.dim[0].label = "stats";
 
@@ -279,7 +279,8 @@ void MPC::controller(ros::Time t_start)
                          t_end_read.toSec()      - t_end_spin.toSec(),   // csv read time
                          t_end_init.toSec()      - t_end_read.toSec(),   // param init time
                          t_end_ASA.toSec()       - t_end_init.toSec(),   // ASA time
-                         CPG_Result.osqp_solve_time,                     // osqp solve time
+                         CPG_Result.cpg_solve_time,                      // cpg CPU solve time
+                         CPG_Result.osqp_solve_time,                     // osqp CPU solve time
                          t_end_publish.toSec()   - t_end_ASA.toSec(),    // publish time
                          (float) workspace.info->iter};                  // number of iterations
                 

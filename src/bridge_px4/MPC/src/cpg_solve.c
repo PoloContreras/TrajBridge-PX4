@@ -122,6 +122,7 @@ void retrieve_solution(){
 
 // perform one ASA sequence to solve a problem instance
 void solve(){
+clock_t start_ASA = clock();
 if (Canon_Outdated.A) {
 canonicalize_Canon_A();
 osqp_update_A(&workspace, Canon_Params.A->x, 0, 0);
@@ -149,6 +150,8 @@ Canon_Outdated.d = 0;
 Canon_Outdated.A = 0;
 Canon_Outdated.l = 0;
 Canon_Outdated.u = 0;
+clock_t end_ASA = clock();
+CPG_Result.cpg_solve_time = (c_float)(end_ASA - start_ASA) / CLOCKS_PER_SEC;
 }
 
 // update solver settings

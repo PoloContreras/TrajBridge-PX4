@@ -27,6 +27,7 @@ typedef struct {
     c_float     *X;              ///< Your variable X
     c_float     *U;              ///< Your variable U
     c_float     osqp_solve_time;
+    c_float     cpg_solve_time;
 } CPG_Result_t;
 
 #endif // ifndef CPG_TYPES_H

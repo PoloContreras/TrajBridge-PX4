@@ -33,8 +33,8 @@
       <param name="setpoint_mode" value="1"/> <!-- 1: read from .csv, 2: circle, 3: lissajou -->
       <param name="s_sqrt_h" value="0.1"/>
       <param name="s_sqrt_v" value="0.1"/>
-      <param name="r_sqrt_h" value="0.5"/>
-      <param name="r_sqrt_v" value="0.5"/>
+      <param name="r_sqrt_h" value="0.6"/>
+      <param name="r_sqrt_v" value="0.6"/>
    </node>
 
    <!-- Initialize the Attitude Controller -->

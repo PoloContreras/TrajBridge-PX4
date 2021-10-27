@@ -152,7 +152,7 @@ bool MPC::setpoint_update()
 
         if (in) {
 
-            if ((k_main % 90) == 0) {
+            if ((k_main % 150) == 0) {
                 string line;
                 if (getline(in, line)) {
                     stringstream s(line);

@@ -35,6 +35,8 @@
       <param name="s_sqrt_v" value="0.1"/>
       <param name="r_sqrt_h" value="0.8"/>
       <param name="r_sqrt_v" value="0.3"/>
+      <param name="k_i_h" value="0.001"/>
+      <param name="k_i_v" value="0.02"/>
    </node>
 
    <!-- Initialize the Attitude Controller -->

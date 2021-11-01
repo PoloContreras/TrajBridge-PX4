@@ -80,15 +80,15 @@ update_Q_sqrt(32, 0.00000000000000000000);
 update_Q_sqrt(33, 0.00000000000000000000);
 update_Q_sqrt(34, 0.00000000000000000000);
 update_Q_sqrt(35, 1.00000000000000000000);
-update_R_sqrt(0, 0.70710678118654757274);
+update_R_sqrt(0, 0.29999999999999998890);
 update_R_sqrt(1, 0.00000000000000000000);
 update_R_sqrt(2, 0.00000000000000000000);
 update_R_sqrt(3, 0.00000000000000000000);
-update_R_sqrt(4, 0.70710678118654757274);
+update_R_sqrt(4, 0.29999999999999998890);
 update_R_sqrt(5, 0.00000000000000000000);
 update_R_sqrt(6, 0.00000000000000000000);
 update_R_sqrt(7, 0.00000000000000000000);
-update_R_sqrt(8, 0.70710678118654757274);
+update_R_sqrt(8, 0.10000000000000000555);
 update_S_sqrt(0, 0.31622776601683794118);
 update_S_sqrt(1, 0.00000000000000000000);
 update_S_sqrt(2, 0.00000000000000000000);
@@ -199,7 +199,7 @@ update_G(29, 0.64825914217591107391);
 solve();
 
 // printing objective function value for demonstration purpose
-printf("f = %f \n", objective_value);
+printf("f = %f \n", CPG_Result.info->obj_val);
 
 // printing solution for demonstration purpose
 for(i = 0; i < 186; i++) {

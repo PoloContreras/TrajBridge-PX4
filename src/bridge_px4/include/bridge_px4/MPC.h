@@ -7,7 +7,6 @@
 extern "C" {
     #include "cpg_solve.h"
     #include "cpg_workspace.h"
-    #include "workspace.h"
 }
 
 #include <std_msgs/Float32MultiArray.h>
@@ -75,6 +74,7 @@ private:
 
   vector<double> stats;    // [overall node time, spin time, read time, init time, ASA time, osqp time, publish time, number of iterations]
 
+  // Lissajou parameters
   float amp_x;
   float amp_y;
   float amp_z;
@@ -88,8 +88,16 @@ private:
   float off_y;
   float off_z;
 
+  // Yaw setpoint
   float yaw_sp;
+
+  // Maximum force
   float F_max;
+
+  // integral term
+  float k_i_h_;
+  float k_i_v_;
+  Matrix<float,3,1> u_i;
 
   // Counter and Time Variables
   double t_dt;

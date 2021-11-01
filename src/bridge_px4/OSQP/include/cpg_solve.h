@@ -9,11 +9,11 @@ extern void canonicalize_Canon_A();
 extern void canonicalize_Canon_l();
 extern void canonicalize_Canon_u();
 
-// retrieve user-defined objective function value
-extern void retrieve_value();
-
 // retrieve solution in terms of user-defined variables
 extern void retrieve_solution();
+
+// retrieve solver info
+extern void retrieve_info();
 
 // perform one ASA sequence to solve a problem instance
 extern void solve();

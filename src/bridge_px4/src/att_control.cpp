@@ -16,31 +16,6 @@ Att_Control::Att_Control()
     att_sp_out.header.frame_id = "map";
     att_sp_out.type_mask = att_sp_out.IGNORE_ATTITUDE;
 
-    /*
-    // Initialize Limits Vector
-    del_slim(0,0) = del_slim(1,0) = pxy_slim_;
-    del_slim(2,0) = pz_slim_;
-    del_slim(3,0) = del_slim(4,0) = del_slim(5,0) = v_slim_;
-    del_slim(6,0) = del_slim(7,0) = del_slim(8,0) = del_slim(9,0) = q_slim_;
-    */
-
-    /*
-    cout << "pos_xy safety limit: " << pxy_slim_ << endl;
-    cout << "pos_z safety limit: " << pz_slim_ << endl;
-    cout << "vel safety limit: " << v_slim_ << endl;
-    cout << "quat safety limit: " << q_slim_ << endl;
-    */
-
-    /*
-    err_lim(0,0) = err_lim(1,0) = err_lim(2,0) = ep_lim_;
-    err_lim(3,0) = err_lim(4,0) = err_lim(5,0) = err_lim(6,0) = eq_lim_;
-    */
-
-    /*
-    cout << "pos integral limit: " << ep_lim_ << endl;
-    cout << "quat integral limit: " << eq_lim_ << endl;
-    */
-
     att_control_switch = false;
     yaw_sp = 0.0;
     tau = 0.5;

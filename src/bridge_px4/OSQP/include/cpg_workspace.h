@@ -23,11 +23,19 @@ typedef struct {
 } Canon_Params_t;
 
 typedef struct {
-    c_float     *objective_value;     ///< Objective function value
-    c_float     *X;              ///< Your variable X
-    c_float     *U;              ///< Your variable U
+    c_float     obj_val;     ///< Objective function value
+    c_int       iter;        ///< Number of iterations
+    char        *status;     ///< Solver status
+    c_float     pri_res;     ///< Primal residual
+    c_float     dua_res;     ///< Dual residual
+} CPG_Info_t;
+
+typedef struct {
+    c_float     *X;                   ///< Your variable X
+    c_float     *U;                   ///< Your variable U
+    CPG_Info_t  *info;                ///< Solver info
     c_float     osqp_solve_time;
-    c_float     cpg_solve_time;
+    c_float 	cpg_solve_time;
 } CPG_Result_t;
 
 #endif // ifndef CPG_TYPES_H
@@ -62,8 +70,8 @@ extern csc Canon_u_map;
 // Vector containing flattened user-defined parameters
 extern c_float CPG_Params_Vec[187];
 
-// Value of the objective function
-extern c_float objective_value;
+// Struct containing solver info
+extern CPG_Info_t CPG_Info;
 
-// Struct containing CPG objective value and solution
+// Struct containing solution and info
 extern CPG_Result_t CPG_Result;

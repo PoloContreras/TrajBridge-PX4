@@ -36,7 +36,7 @@ protected:
   ros::NodeHandle nh;
 
 private:
-  // Limit Check variables
+
   float max_thrust_;
 
   // ROS variables

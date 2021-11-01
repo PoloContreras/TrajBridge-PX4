@@ -120,7 +120,7 @@ catkin_package(
 ###########
 
 # Add MPC subdirectory
-add_subdirectory(MPC)
+add_subdirectory(OSQP)
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations

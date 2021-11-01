@@ -4,7 +4,6 @@
 #include "workspace.h"
 #include "osqp.h"
 #include <time.h>
-
 static c_int i;
 static c_int j;
 
@@ -110,14 +109,17 @@ Canon_Params.u[i] += Canon_u_map.x[j]*CPG_Params_Vec[Canon_u_map.i[j]];
 }
 }
 }
-
-// retrieve user-defined objective function value
-void retrieve_value(){
-objective_value = workspace.info->obj_val + *Canon_Params.d;
-}
-
 // retrieve solution in terms of user-defined variables
 void retrieve_solution(){
+}
+
+// retrieve solver info
+void retrieve_info(){
+CPG_Info.obj_val = workspace.info->obj_val + *Canon_Params.d;
+CPG_Info.iter = workspace.info->iter;
+CPG_Info.status = workspace.info->status;
+CPG_Info.pri_res = workspace.info->pri_res;
+CPG_Info.dua_res = workspace.info->dua_res;
 }
 
 // perform one ASA sequence to solve a problem instance
@@ -142,8 +144,8 @@ clock_t start = clock();
 osqp_solve(&workspace);
 clock_t end = clock();
 CPG_Result.osqp_solve_time = (c_float)(end - start) / CLOCKS_PER_SEC;
-retrieve_value();
 retrieve_solution();
+retrieve_info();
 Canon_Outdated.P = 0;
 Canon_Outdated.q = 0;
 Canon_Outdated.d = 0;

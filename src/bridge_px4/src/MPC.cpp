@@ -1,7 +1,7 @@
 #include <bridge_px4/MPC.h>
 
-ifstream in("/home/max/Documents/codegen/drone/WPs_jump.csv");
-//ifstream in("/home/max/Documents/codegen/drone/hover.csv");
+//ifstream in("/home/max/Documents/codegen/drone/WPs_jump.csv");
+ifstream in("/home/max/Documents/codegen/drone/hover.csv");
 //ifstream in("/home/carl/Desktop/CPG/TrajBridge-PX4/WPs_jump.csv");
 //ifstream in("/home/carl/Desktop/CPG/TrajBridge-PX4/hover.csv");
 
@@ -14,7 +14,8 @@ MPC::MPC()
 :   x_box_lim_(3.0),y_box_lim_(1.75),z_box_lim_(1.0),
     mass_(0.53),setpoint_mode_(1),
     s_sqrt_h_(0.1),s_sqrt_v_(0.1),
-    r_sqrt_h_(0.5),r_sqrt_v_(0.5)
+    r_sqrt_h_(0.5),r_sqrt_v_(0.5),
+    k_i_h_(0.01),k_i_v_(0.01)
 {
     ros::param::get("~x_box_lim", x_box_lim_);
     ros::param::get("~y_box_lim", y_box_lim_);
@@ -25,38 +26,21 @@ MPC::MPC()
     ros::param::get("~s_sqrt_v", s_sqrt_v_);
     ros::param::get("~r_sqrt_h", r_sqrt_h_);
     ros::param::get("~r_sqrt_v", r_sqrt_v_);
+    ros::param::get("~k_i_h", k_i_h_);
+    ros::param::get("~k_i_v", k_i_v_);
 
     // ROS Initialization
     pose_curr_sub = nh.subscribe("mavros/local_position/pose",1,&MPC::pose_curr_cb,this);
-    vel_curr_sub = nh.subscribe("mavros/local_position/velocity_local",1,&MPC::vel_curr_cb,this);    
+    vel_curr_sub = nh.subscribe("mavros/local_position/velocity_local",1,&MPC::vel_curr_cb,this);
     force_sp_pub = nh.advertise<geometry_msgs::Vector3Stamped>("setpoint/force",1);
     yaw_sp_pub = nh.advertise<std_msgs::Float64>("setpoint/yaw",1);
     stats_pub = nh.advertise<std_msgs::Float64MultiArray>("stats",1); 
-
-    // Initialize Limits Vector
-    /*
-    del_slim(0,0) = del_slim(1,0) = pxy_slim_;
-    del_slim(2,0) = pz_slim_;
-    del_slim(3,0) = del_slim(4,0) = del_slim(5,0) = v_slim_;
-    del_slim(6,0) = del_slim(7,0) = del_slim(8,0) = del_slim(9,0) = q_slim_;
-    */
-
-    /*
-    cout << "pos_xy safety limit: " << pxy_slim_ << endl;
-    cout << "pos_z safety limit: " << pz_slim_ << endl;
-    cout << "vel safety limit: " << v_slim_ << endl;
-    cout << "quat safety limit: " << q_slim_ << endl;
-    */
-
-    /*
-    err_lim(0,0) = err_lim(1,0) = err_lim(2,0) = ep_lim_;
-    err_lim(3,0) = err_lim(4,0) = err_lim(5,0) = err_lim(6,0) = eq_lim_;
-    */
 
     k_main = 0;
     main_switch = false;
     safety_switch = true;
 
+    // initialize MPC
     F_max = 1.5*mass_*9.81;
     update_fv_min(-0.5*mass_*9.81);
     update_fv_max(F_max*0.98481 - mass_*9.81);
@@ -74,6 +58,8 @@ MPC::MPC()
 
     set_solver_check_termination(5);
     set_solver_max_iter(15);
+
+    u_i.setZero();
 
     stats_out.layout.dim.push_back(std_msgs::MultiArrayDimension());
     stats_out.layout.dim[0].size = 9;
@@ -255,14 +241,19 @@ void MPC::controller(ros::Time t_start)
             for (int i = 0; i < 3; i++) {
                 update_u_prev(i, CPG_Result.U[3+i]);
             }
-            
+
+            // integral part
+            u_i(0,0) -= k_i_h_*del_x(0,0);
+            u_i(1,0) -= k_i_h_*del_x(1,0);
+            u_i(2,0) -= k_i_v_*del_x(2,0);
+
             if (limit_check() == true) {
 
                 // Publish force setpoint
-                force_sp_out.vector.x = CPG_Result.U[3];
-                force_sp_out.vector.y = CPG_Result.U[4];
-                force_sp_out.vector.z = CPG_Result.U[5] + mass_*9.81;
-
+                force_sp_out.vector.x = CPG_Result.U[3] + u_i(0,0);
+                force_sp_out.vector.y = CPG_Result.U[4] + u_i(1,0);
+                force_sp_out.vector.z = CPG_Result.U[5] + mass_*9.81 + u_i(2,0);
+                
                 force_sp_out.header.stamp = ros::Time::now();
                 force_sp_out.header.seq = k_main;
 
@@ -282,7 +273,7 @@ void MPC::controller(ros::Time t_start)
                          CPG_Result.cpg_solve_time,                      // cpg CPU solve time
                          CPG_Result.osqp_solve_time,                     // osqp CPU solve time
                          t_end_publish.toSec()   - t_end_ASA.toSec(),    // publish time
-                         (float) workspace.info->iter};                  // number of iterations
+                         (float) CPG_Result.info->iter};                  // number of iterations
                 
                 stats_out.data.clear();
                 stats_out.data.insert(stats_out.data.end(), stats.begin(), stats.end());
@@ -295,8 +286,8 @@ void MPC::controller(ros::Time t_start)
 
             }
         }
-    }
 
+    }
 }
 
 int main(int argc, char **argv)

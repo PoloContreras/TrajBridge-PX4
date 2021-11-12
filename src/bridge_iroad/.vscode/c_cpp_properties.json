@@ -1,0 +1,19 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/lowjunen/StanfordMSL/TrajBridge-PX4/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/lowjunen/StanfordMSL/TrajBridge-PX4/src/bridge_iroad/include/**",
+        "/home/lowjunen/StanfordMSL/TrajBridge-PX4/src/bridge_px4/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}

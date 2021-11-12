@@ -1,0 +1,9 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/lowjunen/StanfordMSL/TrajBridge-PX4/devel/lib/python2.7/dist-packages",
+        "/opt/ros/melodic/lib/python2.7/dist-packages"
+    ],
+    "cSpell.words": [
+        "PRNDL"
+    ]
+}

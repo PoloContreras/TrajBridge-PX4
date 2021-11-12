@@ -10,6 +10,10 @@ add_compile_options(-std=c++14)
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     rospy
+    mavros
+    mavros_extras
+    mavros_msgs
+    mavlink
     std_msgs
     message_generation
     rosbag
@@ -157,6 +161,9 @@ include_directories(
 
 add_executable(iroad_teleop_joy src/iroad_teleop_joy.cpp)
 target_link_libraries(iroad_teleop_joy ${catkin_LIBRARIES})
+
+add_executable(iroad_auto src/iroad_auto.cpp)
+target_link_libraries(iroad_auto ${catkin_LIBRARIES})
 
 add_executable(udp_server src/udp_server.cpp)
 target_link_libraries(udp_server ${catkin_LIBRARIES})

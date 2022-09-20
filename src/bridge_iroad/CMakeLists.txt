@@ -172,6 +172,9 @@ target_link_libraries(iroad_closedloop ${catkin_LIBRARIES})
 add_executable(iroad_teleop_can src/iroad_teleop_can.cpp)
 target_link_libraries(iroad_teleop_can ${catkin_LIBRARIES})
 
+add_executable(iroad_pos_tracker src/iroad_pos_tracker.cpp)
+target_link_libraries(iroad_pos_tracker ${catkin_LIBRARIES})
+
 #############
 ## Install ##
 #############

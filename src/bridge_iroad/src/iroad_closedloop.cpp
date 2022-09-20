@@ -12,14 +12,14 @@ Teleop_IRoad::Teleop_IRoad():
   accel(0.0), //variable for accelerator value
   steer(0.0), //variable for steering value
   udp_hz(100), //frequency in Hz of sending UDP messages for vehicle control
-  lat0(37.4299484), //latitude of point of origin
-  lon0(-122.1836507), //longitude of point of origin
+  lat0(37.4300002), //latitude of point of origin
+  lon0(-122.1838495), //longitude of point of origin
   ptx(0.0), //difference in longitude (in meters) from target location to point of origin
   pty(0.0), //difference in latitude (in meters) from target location to point of origin
   dthres(5.0), //radius around goal location within which closed-loop controls deactivate, in meters
   cl_act_chk(0),
   v_const(2.2222222), //assuming vehicle constant speed for calculation of feedback control, in meters per second (TODO: replace this with feedback from vehicle CAN via UDP)
-  st_conv(M_PI/21000.0), //Factor to convert commanded steering setting to radians
+  st_conv(M_PI/1728.0), //Factor to convert commanded steering setting to radians
   //ctrl_k1(1.0), //tunable constant for feedback control (velocity and steering), must be greater than zero to ensure convergence
   ctrl_k2(1.0), //tunable constant for feedback control (steering), must be greater than zero to ensure convergence
   //ctrl_k3(1.0), //tunable constant for feedback control (steering for target heading), must be greater than zero to ensure convergence
@@ -52,12 +52,14 @@ Teleop_IRoad::Teleop_IRoad():
   cmd_pub_ = nh.advertise<geometry_msgs::Twist>("cmd_input", 10); //prepare to publish movement instructions sent to MABx
   udpLoop = nh.createTimer(ros::Duration(1.0/udp_hz),&Teleop_IRoad::udp_cb, this);
 
+  tck_sub_ = nh.subscribe<geometry_msgs::Pose2D>("tracker", 10, &Teleop_IRoad::pos_cb,this);
+
   // cout << "Lat: " << lat_0 << " Lon: " << lon_0 << endl;
   // cout << " ==================== " << endl;
   pt(0,0) = ptx;
   pt(1,0) = pty;
   pt(2,0) = 0.0;
-  
+
   p0 = gcs2ecef(lat0,lon0);
   Re2e = Re2e_gen(lat0,lon0);
   
@@ -83,6 +85,15 @@ Teleop_IRoad::Teleop_IRoad():
       
 }
 
+void Teleop_IRoad::pos_cb(const geometry_msgs::Pose2D::ConstPtr& pos)
+{
+  /*pt(0,0) = pos->x - 4.0; //Permanent offset added to target location
+  pt(1,0) = pos->y + 5.0; */
+
+  pt(0,0) = pos->x;
+  pt(1,0) = pos->y; //Target location is taken as-is from relevant ROS node
+}
+
 void Teleop_IRoad::joy_cb(const sensor_msgs::Joy::ConstPtr& joy)
 {
   cmd_joy.steer = (float) steer_scale*joy->axes[steer_id];
@@ -99,13 +110,24 @@ void Teleop_IRoad::udp_cb(const ros::TimerEvent& event) {
   Matrix<double,3,1> r_tW;        // Relative position of target in world frame.
   Matrix<double,3,1> r_tb;        // Relative position of target in body frame.
   r_tW = pt-pose.block(0,0,3,1);
-  r_tb = quatrot(r_tW);
+  Vector4d WB_q;
+  WB_q(0,0) = pose(3,0);
+  WB_q(1,0) = pose(4,0);
+  WB_q(2,0) = pose(5,0);
+  WB_q(3,0) = pose(6,0);
+
+  //cout << "WB_q " << WB_q << endl;
+
+  r_tb = quatrot(r_tW,WB_q);
+
+  cout << "world frame target position: " << r_tW << endl;
+  cout << "body frame target position: " << r_tb << endl;
 
   double d_t = r_tb.norm();      // l2-norm of relative position
 
   Matrix<double,3,1> r_f;       // Front vector in body frame
-  r_f << 0.0,1.0,0.0;
-  
+  r_f << 1.0,0.0,0.0;
+
   /*steer = rad2deg(acos(r_tb.dot(r_f)/d_t)); //debug: steering setting is equal to angle between vehicle heading and goal direction
 
   steer = min(steer, max_steer);
@@ -120,10 +142,14 @@ void Teleop_IRoad::udp_cb(const ros::TimerEvent& event) {
   */
 
   double alpha = acos(r_tb.dot(r_f)/d_t); //angle between vehicle heading and direction of goal (in radians)
-  if (r_tb(0,0) < 0){
+  //cout << "|alpha|: " << alpha << endl;
+  if (r_tb(0,0) < 0){ //If vehicle is consistently turning in the wrong direction, change the direction of the inequality
     alpha = -alpha; //accounting for the difference between left and right turns
   }
   //double delta; //angle between vehicle heading and desired vehicle heading at target (in radians), not yet implemented
+  cout << "alpha: " << alpha << endl;
+  //cout << "=======" << endl;
+
 
   double omega = ctrl_k2*alpha; //feedback control law dictates this angular velocity value (in terms of the vehicle's heading) to target the goal location, without a specific final heading (with respect to the world frame)
   //double omega = ctrl_k2*alpha + ctrl_k1*sin(alpha)*cos(alpha)*(alpha + ctrl_k3*delta)/alpha; //instantaneous angular velocity required by feedback control law, if goal position includes a target heading
@@ -144,18 +170,25 @@ void Teleop_IRoad::udp_cb(const ros::TimerEvent& event) {
 
     if (d_t >= dthres) {
       cmd_out.PRNDL_ct = 1;
-      cmd_out.accel = 0.5; //partial throttle commanded for safety (without CAN feedback available yet)
+      cmd_out.accel = 1.0; //full throttle commanded to reach target speed quickly
     } else {
       cmd_out.accel = 0.0; //stop accelerating once goal is reached
+      cout << "Target reached!" << endl;
+      cout << "===============" << endl;
     }
   } else {
     // Follow joystick input.
   }
-  // cout << "Pose (World): \n" << pose << endl;
-  /*cout << "Relative Position (World):\n" << r_tW << endl;
+  /*cout << "Pose (World): \n" << pose << endl;
+  cout << "Relative Position (World):\n" << r_tW << endl;
   cout << "Relative Position (Body):\n" << r_tb << endl;
-  cout << "Steering:" << steer << endl;
-  cout << "===========================================" << endl;*/
+  cout << "Steering: " << steer << endl;
+  cout << "Acceleration: " << accel << endl;
+  cout << "======= ====================================" << endl;
+
+  cout << "target x position: " << pt(0,0) << endl;
+  cout << "target y position: " << pt(1,0) << endl;
+  cout << " ==================== " << endl;*/
 
   // Send Packet
   sendto(socket_desc, &cmd_out, sizeof(cmd_out), MSG_CONFIRM, (const struct sockaddr *)&client_addr, sizeof(client_addr));
@@ -168,7 +201,7 @@ void Teleop_IRoad::udp_cb(const ros::TimerEvent& event) {
   cmd_pub_.publish(cmd_vel);
 }
 
-void Teleop_IRoad::imu_cb(const sensor_msgs::Imu::ConstPtr& imu) {
+  void Teleop_IRoad::imu_cb(const sensor_msgs::Imu::ConstPtr& imu) {
     pose(3,0) = imu->orientation.w;
     pose(4,0) = imu->orientation.x;
     pose(5,0) = imu->orientation.y;
@@ -183,9 +216,6 @@ void Teleop_IRoad::gps_cb(const sensor_msgs::NavSatFix::ConstPtr& gps) {
   p_ecef = gcs2ecef(lat,lon);
 
   pose.block<3,1>(0,0) = Re2e*(p_ecef-p0);
-
-  // cout << "x: " << pose(0,0) << " y: " << pose(1,0) << " z: " << pose(2,0) << endl;
-  // cout << " ==================== " << endl;
 }
 
 double Teleop_IRoad::deg2rad(const double theta_d) {
@@ -196,21 +226,37 @@ double Teleop_IRoad::rad2deg(const double theta_r) {
     return((180.0/M_PI)*theta_r);
 }
 
-Matrix<double,3,1> Teleop_IRoad::quatrot(const Vector3d& v) {    
-    double qw = pose(3,0);
-    double qx = pose(4,0);
-    double qy = pose(5,0);
-    double qz = pose(6,0);
+Matrix<double,3,1> Teleop_IRoad::quatrot(const Vector3d& v, const Vector4d& q) {    
+    Vector4d r_in;
+    Vector4d r_out;
+    Vector3d v_out;
+    Vector4d qc;
+    
+    qc = quatcon(q);
+    r_in << 0.0, v;
+    r_out = quatmap(quatmap(q)*r_in)*qc;
 
-    Matrix<double,3,3> R;
-    R << (qw*qw + qx*qx - qy*qy - qz*qz), (2*qx*qy-2*qw*qz), (2*qx*qz-2*qw*qy), 
-         (2*qx*qy+2*qw*qz), (qw*qw - qx*qx + qy*qy - qz*qz), (2*qy*qz-2*qw*qx), 
-         (2*qx*qz+2*qw*qy), (2*qy*qz+2*qw*qx), (qw*qw - qx*qx - qy*qy + qz*qz);
+    v_out << r_out.block(1,0,3,1);
 
-    Matrix<double,3,1> vp;
-    vp = R*v;
+    return v_out;
+}
+Matrix<double,4,4> Teleop_IRoad::quatmap(const Vector4d& q) {    
 
-    return vp;
+    Matrix<double,4,4> M;
+    M << q(0,0), -q(1,0), -q(2,0), -q(3,0),
+         q(1,0),  q(0,0), -q(3,0),  q(2,0),
+         q(2,0),  q(3,0),  q(0,0), -q(1,0),
+         q(3,0), -q(2,0),  q(1,0),  q(0,0);
+
+    return M;
+}
+
+Matrix<double,4,1> Teleop_IRoad::quatcon(const Vector4d& q) {    
+
+    Matrix<double,4,1> qc;
+    qc << q(0), -q.block(1,0,3,1);
+
+    return qc;
 }
 
 Matrix<double,3,1> Teleop_IRoad::gcs2ecef(const double lat,const double lon) {

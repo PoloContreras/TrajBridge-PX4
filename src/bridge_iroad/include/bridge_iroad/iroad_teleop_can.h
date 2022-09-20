@@ -36,7 +36,7 @@ public:
     u_int32_t can_sftps;  //PRNDL setting
     int32_t can_steer;  //vehicle steering angle
     u_int32_t can_accel;  //accelerator setting
-    u_int32_t can_brkpd;  //break pedal engagement
+    u_int32_t can_brkpd;  //brake pedal engagement
     int32_t can_vspd;   //vehicle speed
     int32_t can_lean;   //vehicle lean angle
     u_int32_t can_hzdl;   //turn or hazard light engagement

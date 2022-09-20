@@ -7,6 +7,7 @@
 #include <sensor_msgs/Joy.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/NavSatFix.h>
+#include <geometry_msgs/Pose2D.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,6 +42,7 @@ private:
   ros::Subscriber joy_sub_;
   ros::Subscriber imu_sub_;
   ros::Subscriber gps_sub_;
+  ros::Subscriber tck_sub_;
 
   ros::Publisher cmd_pub_;
   //ros::Publisher can_pub_;
@@ -120,9 +122,12 @@ private:
   void udp_cb(const ros::TimerEvent& event);
   void imu_cb(const sensor_msgs::Imu::ConstPtr& imu);
   void gps_cb(const sensor_msgs::NavSatFix::ConstPtr& gps);
+  void pos_cb(const geometry_msgs::Pose2D::ConstPtr& pos);
   double deg2rad(const double theta_d);
   double rad2deg(const double theta_r);
-  Matrix<double,3,1> quatrot(const Vector3d& v);
+  Matrix<double,3,1> quatrot(const Vector3d& v, const Vector4d& q);
+  Matrix<double,4,4> quatmap(const Vector4d& q);
+  Matrix<double,4,1> quatcon(const Vector4d& q);
   Matrix<double,3,1> gcs2ecef(const double lat,const double lon);
   Matrix<double,3,3> Re2e_gen(const double lat,const double lon);
 };

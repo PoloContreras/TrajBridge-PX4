@@ -1,7 +1,7 @@
 #include <bridge_iroad/iroad_teleop_can.h>
 
 Teleop_Can::Teleop_Can():
-  st_conv(M_PI/21000.0), //Factor to convert commanded steering setting to radians
+  st_conv(M_PI/1728.0), //Factor to convert commanded steering setting to radians
   //debug_ctr(0), //counter to regulate the speed of the 
   whlbase(1.695) //vehicle wheelbase, in meters
 {
@@ -9,7 +9,7 @@ Teleop_Can::Teleop_Can():
 
   can_pub_ = n.advertise<geometry_msgs::Twist>("can_feedback", 1000); 
 
-  double hz = 1.0;
+  double hz = 10.0;
   printLoop = n.createTimer(ros::Duration(1.0/hz),&Teleop_Can::print_cb, this);
 
   // Creating socket file descriptor
@@ -42,19 +42,19 @@ Teleop_Can::Teleop_Can():
 
 void Teleop_Can::print_cb(const ros::TimerEvent& event) {
     /* Print received information to serve as monitor */
-    cout << "CAN feedback clock signal: " << can_feedback.can_clck << endl;
-    cout << "Shift Position: " << can_feedback.can_sftps << endl;
-    cout << "Steering: " << can_feedback.can_steer << endl;
-    cout << "Accelerator Pedal Position: " << can_feedback.can_accel << endl;
-    cout << "Brake Pedal Engagement: " << can_feedback.can_brkpd << endl;
-    cout << "Instantaneous Vehicle Speed: " << can_feedback.can_vspd << endl;
-    cout << "Vehicle Lean Angle: " << can_feedback.can_lean << endl;
-    cout << "Turn/Hazard Light Engagement: " << can_feedback.can_hzdl << endl;
-    cout << "Door Open Indication: " << can_feedback.can_dcty << endl;
-    cout << "Seat Belt Engagement: " << can_feedback.can_stbt << endl;
-    cout << "Parking Brake ON: " << can_feedback.can_pkon << endl;
-    cout << "Parking Brake OFF: " << can_feedback.can_pkoff << endl;
-    cout << "===========================================" << endl;
+    // cout << "CAN feedback clock signal: " << can_feedback.can_clck << endl;
+    // cout << "Shift Position: " << can_feedback.can_sftps << endl;
+    // cout << "Steering: " << can_feedback.can_steer << " Steering angle: " << can_feedback.can_steer/9.6 << "deg" << endl;
+    // cout << "Accelerator Pedal Position: " << can_feedback.can_accel << endl;
+    // cout << "Brake Pedal Engagement: " << can_feedback.can_brkpd << endl;
+    // cout << "Instantaneous Vehicle Speed: " << can_feedback.can_vspd << endl;
+    // cout << "Vehicle Lean Angle: " << can_feedback.can_lean << endl;
+    // cout << "Turn/Hazard Light Engagement: " << can_feedback.can_hzdl << endl;
+    // cout << "Door Open Indication: " << can_feedback.can_dcty << endl;
+    // cout << "Seat Belt Engagement: " << can_feedback.can_stbt << endl;
+    // //cout << "Parking Brake ON: " << can_feedback.can_pkon << endl;
+    // //cout << "Parking Brake OFF: " << can_feedback.can_pkoff << endl;
+    // cout << "===========================================" << endl;
 }
 
 int main(int argc, char** argv)
